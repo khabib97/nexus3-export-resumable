@@ -2,9 +2,11 @@ package fr.kage.nexus3;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.Scanner;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -31,7 +33,9 @@ public class Nexus3ExportApplication implements CommandLineRunner {
 				boolean authenticate = Boolean.valueOf(credentials.getProperty("authenticate", "false"));
 				String username = removeTrailingQuotes(credentials.getProperty("username"));
 				String password = removeTrailingQuotes(credentials.getProperty("password"));
-				new DownloadRepository(url, repoId, downloadPath, authenticate, username, password).start();
+				
+				String token = readOldToken();
+				new DownloadRepository(url, repoId, downloadPath, authenticate, username, password, token).start();
 				return;
 			}
 			else
@@ -73,5 +77,24 @@ public class Nexus3ExportApplication implements CommandLineRunner {
 		}
 
 		return result;
+	}
+	
+	private String readOldToken() {
+		String token = null;
+		try {
+
+			File file = new File("token.txt");
+			Scanner reader = new Scanner(file);
+			while (reader.hasNextLine()) {
+				token = reader.nextLine();
+				System.out.println(token);
+			}
+			reader.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}
+
+		return token;
 	}
 }
