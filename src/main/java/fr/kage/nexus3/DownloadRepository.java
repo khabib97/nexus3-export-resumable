@@ -52,7 +52,6 @@ public class DownloadRepository implements Runnable {
 	private int threadpool;
 	
 	private String oldToken;
-	private static int counter=0;
 
 	private AtomicLong assetProcessed = new AtomicLong();
 	private AtomicLong assetFound = new AtomicLong();
@@ -146,10 +145,6 @@ public class DownloadRepository implements Runnable {
 			
 			try {
 				assetsEntity = restTemplate.getForEntity(getAssets.build().toUri(), Assets.class);
-				counter++;
-				LOGGER.info("Counter {}", counter);;
-				if(counter==10)
-					throw new Exception();
 			} catch(Exception e) {
 				LOGGER.error("Error retrieving available assets to download", e);
 				LOGGER.error("Error retrieving available assets to download. Please check if you've specified the correct url and repositoryId in the command line and -if authentication is needed- username and password in the credentials.properties file");
