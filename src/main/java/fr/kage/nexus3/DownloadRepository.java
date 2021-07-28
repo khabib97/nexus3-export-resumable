@@ -144,11 +144,12 @@ public class DownloadRepository implements Runnable {
 			final ResponseEntity<Assets> assetsEntity;
 			
 			try {
+				if(continuationToken != null) saveToken();
 				assetsEntity = restTemplate.getForEntity(getAssets.build().toUri(), Assets.class);
+				
 			} catch(Exception e) {
 				LOGGER.error("Error retrieving available assets to download", e);
 				LOGGER.error("Error retrieving available assets to download. Please check if you've specified the correct url and repositoryId in the command line and -if authentication is needed- username and password in the credentials.properties file");
-				saveToken();
 				executorService.shutdownNow();
 				return;
 			}
@@ -197,6 +198,7 @@ public class DownloadRepository implements Runnable {
 				int tryCount = 1;
 				while (tryCount <= retryDownload) {
 					try (InputStream assetStream = downloadUri.toURL().openStream()) {
+						Files.deleteIfExists(assetPath);
 						Files.copy(assetStream, assetPath);
 						final HashCode hash = com.google.common.io.Files.asByteSource(assetPath.toFile()).hash(Hashing.sha1());
 						if (Objects.equals(hash.toString(), item.getChecksum().getSha1()))
